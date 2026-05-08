@@ -368,42 +368,40 @@
         }
 
         async function translateText() {
+            // 1. User ka input lein
             const urduText = urduInput.value.trim();
+            
+            // Agar input khali hai toh alert dain
             if (!urduText) {
-                alert('Please enter Urdu text to translate');
+                alert("Please enter Urdu text first!");
                 return;
             }
 
-            englishOutput.value = 'Translating...';
-            
+            // Output box mein "Translating..." show karein
+            englishOutput.value = "Translating... Please wait.";
+
             try {
-                // Using Google Translate API (free) or Anthropic API
-                // For production, use paid API or implement backend
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': 'YOUR_ANTHROPIC_API_KEY'
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-opus-4-1-20250805',
-                        max_tokens: 500,
-                        messages: [{
-                            role: 'user',
-                            content: `Translate this Urdu text to English. Provide only the translation, no explanations:\n\n${urduText}`
-                        }]
-                    })
-                });
-
+                // 2. MyMemory Free API ko call karein
+                const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(urduText)}&langpair=ur|en`;
+                
+                const response = await fetch(apiUrl);
                 const data = await response.json();
-                const translation = data.content[0].text;
-                englishOutput.value = translation;
-                totalTranslations++;
-                document.getElementById('totalTranslations').textContent = totalTranslations;
-
+                
+                // 3. Translation ko output box mein show karein aur stats update karein
+                if (data.responseData && data.responseData.translatedText) {
+                    englishOutput.value = data.responseData.translatedText;
+                    
+                    // Update translation count
+                    totalTranslations++;
+                    document.getElementById('totalTranslations').textContent = totalTranslations;
+                } else {
+                    englishOutput.value = "Translation failed. Please try again.";
+                }
+                
             } catch (error) {
-                englishOutput.value = 'Translation error. Please check your API key or try again.';
-                console.error('Translation error:', error);
+                // Agar net ka issue ho
+                console.error("API Error: ", error);
+                englishOutput.value = "Network issue. Please check your internet connection.";
             }
         }
 
@@ -434,40 +432,6 @@
                 'page_location': window.location.href
             });
         }
-        async function translateText() {
-    // 1. User ka input lein
-    const urduText = document.getElementById('urduInput').value;
-    
-    // Agar input khali hai toh kuch na karein
-    if (!urduText.trim()) {
-        alert("Please enter Urdu text first!");
-        return;
-    }
-
-    // Output box mein "Translating..." show karein
-    const outputBox = document.getElementById('englishOutput');
-    outputBox.value = "Translating... Please wait.";
-
-    try {
-        // 2. MyMemory Free API ko call karein (No API Key Required for basic usage)
-        const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(urduText)}&langpair=ur|en`;
-        
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        
-        // 3. Translation ko output box mein show karein
-        if (data.responseData && data.responseData.translatedText) {
-            outputBox.value = data.responseData.translatedText;
-        } else {
-            outputBox.value = "Translation failed. Please try again.";
-        }
-        
-    } catch (error) {
-        // Agar net ka issue ho ya API down ho
-        console.error("API Error: ", error);
-        outputBox.value = "Network issue. Internet connection check karein.";
-    }
-}
     </script>
 </body>
 </html>
