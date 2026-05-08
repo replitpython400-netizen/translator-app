@@ -224,6 +224,31 @@
             <div class="success" id="successMessage">
                 ✅ Text copied to clipboard!
             </div>
+            <!-- Language Selection Dropdowns -->
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">From Language:</label>
+                    <select id="sourceLang" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 16px;">
+                        <option value="ur">Urdu</option>
+                        <option value="en">English</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                        <option value="pa">Punjabi</option>
+                    </select>
+                </div>
+                
+                <div style="flex: 1;">
+                    <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">To Language:</label>
+                    <select id="targetLang" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #e0e0e0; font-size: 16px;">
+                        <option value="en">English</option>
+                        <option value="ur">Urdu</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                        <option value="pa">Punjabi</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Iske niche aapka purana <div class="input-group"> wala code shuru hoga -->
 
             <div class="input-group">
                 <div class="input-field">
@@ -369,30 +394,29 @@
         }
 
         async function translateText() {
-            // 1. User ka input lein
             const urduText = urduInput.value.trim();
             
-            // Agar input khali hai toh alert dain
+            // Naye Dropdowns se language codes lein
+            const sourceLanguage = document.getElementById('sourceLang').value;
+            const targetLanguage = document.getElementById('targetLang').value;
+            
             if (!urduText) {
-                alert("Please enter Urdu text first!");
+                alert("Please enter text first!");
                 return;
             }
 
-            // Output box mein "Translating..." show karein
             englishOutput.value = "Translating... Please wait.";
 
             try {
-                // 2. MyMemory Free API ko call karein
-                const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(urduText)}&langpair=ur|en`;
+                // API URL mein ab fix 'ur|en' ki jagah dynamic variables laga diye hain
+                const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(urduText)}&langpair=${sourceLanguage}|${targetLanguage}`;
                 
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
-                // 3. Translation ko output box mein show karein aur stats update karein
                 if (data.responseData && data.responseData.translatedText) {
                     englishOutput.value = data.responseData.translatedText;
                     
-                    // Update translation count
                     totalTranslations++;
                     document.getElementById('totalTranslations').textContent = totalTranslations;
                 } else {
@@ -400,11 +424,11 @@
                 }
                 
             } catch (error) {
-                // Agar net ka issue ho
                 console.error("API Error: ", error);
                 englishOutput.value = "Network issue. Please check your internet connection.";
             }
         }
+                
 
         function copyText() {
             if (!englishOutput.value) return;
